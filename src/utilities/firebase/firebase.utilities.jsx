@@ -2,7 +2,9 @@
 import { initializeApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
-import {getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider} from 'firebase/auth';
+import {getAuth, signInWithPopup, GoogleAuthProvider} from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+
 
 import {getFirestore, doc, getDoc, setDoc} from 'firebase/firestore';
 
@@ -13,7 +15,7 @@ const firebaseConfig = {
   projectId: "crwn-clth-db-8dcae",
   storageBucket: "crwn-clth-db-8dcae.appspot.com",
   messagingSenderId: "920755405096",
-  appId: "1:920755405096:web:692b13c8da8f631b56101d"
+  appId: "1:920755405096:web:692b13c8da8f631b56101d" 
 };
 
 
@@ -21,18 +23,20 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 
-const provider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();
 
-provider.setCustomParameters({
+googleProvider.setCustomParameters({
     prompt: 'select_account',
 })
 
 export const auth = getAuth();
-export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
+export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
+
 
 export const db = getFirestore();
 
-export const createUserDocumentFromAuth = async(userAuth) => {
+export const createUserDocumentFromAuth = async(userAuth, additionalInformation = {}) => {
+    if(!auth) return;
     const userDocRef = doc(db, 'user', userAuth.uid)
     console.log(userDocRef);
 
@@ -41,21 +45,33 @@ export const createUserDocumentFromAuth = async(userAuth) => {
     console.log(getUSerData);
 
     if(!getUSerData.exists()){
-        const {displayName, email} = userAuth
-        const createdAt  = new Date()
+        const {displayName, email} = userAuth;
+        const createdAt  = new Date();
 
         try{
             await setDoc(userDocRef, {
                 displayName,
                 email,
-                createdAt
+                createdAt,
+                ...additionalInformation,
             });
         }catch(error){
-            console.log("Error while adding user: " + error.message)
+            console.log("Error while adding user: ",  error.message)
         }
     }
-
     return userDocRef;
-
 } 
 
+export const createUserWithEmailandPassword = async (email, password) => {
+    //console.log('text');
+    if(!email || !password) return;
+    
+    return await createUserWithEmailAndPassword(auth, email, password);
+}
+
+export const signInUserWithEmailandPassword = async (email, password) => {
+    //console.log('text');
+    if(!email || !password) return;
+    
+    return await signInWithEmailAndPassword(auth, email, password);
+}
