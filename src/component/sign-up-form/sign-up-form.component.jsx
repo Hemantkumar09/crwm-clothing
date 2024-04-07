@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { createUserWithEmailandPassword, createUserDocumentFromAuth } from "../../utilities/firebase/firebase.utilities";
 import  FormInput  from "../form-input/form-input.component";
 import Button from "../button/button.component";
 import '../sign-in/sign-in.style.scss'
+import { UserContext } from "../../contexts/user.contexts";
 
 
 const displayFormDetails = {
@@ -16,6 +17,9 @@ const SignUpForm = () =>{
     const [formFields, setFormFields] = useState(displayFormDetails)
     const {displayName, email, password, confirmPassword} = formFields;
     //console.log(formFields);
+
+    
+    console.log('hit');
 
     const resetFormFields = () =>{
         setFormFields(displayFormDetails);
@@ -33,6 +37,7 @@ const SignUpForm = () =>{
         } 
         try{
             const {user} = await createUserWithEmailandPassword(email, password);
+           
             await createUserDocumentFromAuth (user, {displayName})
             resetFormFields()
             //console.log(response);             
@@ -86,7 +91,7 @@ const SignUpForm = () =>{
                     onChange={handleChange} 
                     value={confirmPassword}
                 />
-                <Button buttonType="default" type="submit">Submit</Button>
+                <Button buttonType="defaultu" type="submit">Submit</Button>
             </form>
 
         </div>
